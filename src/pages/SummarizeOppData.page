@@ -1,0 +1,69 @@
+<apex:page controller="SummarizeOppDataController">
+    <apex:includeScript value="{!$Resource.jquery_1_5_1}"/>
+    <apex:includeScript value="{!$Resource.json2}"/>
+    <apex:includeScript value="{!$Resource.cometd}"/>
+    <apex:includeScript value="{!$Resource.jquery_cometd}"/>
+    <script type="text/javascript">
+        (function($){
+            $(document).ready(function() {
+                // Connect to the CometD endpoint
+                $.cometd.init({
+                        url: window.location.protocol+'//'+window.location.hostname+'/cometd/26.0/',
+                        requestHeaders: { Authorization: 'OAuth {!$Api.Session_ID}'}
+                    });
+                // Subscribe to a topic. JSON-encoded update will be returned
+                // in the callback
+                $.cometd.subscribe('/topic/OppSummaryData', function(message) {
+        			$('#'+message.data.sobject.Id).css('display','block');
+        			$('#'+message.data.sobject.Id+'_icon').attr('src','{!URLFOR($Resource.complete_icon)}');
+                });
+            });
+        })(jQuery)
+    </script>    
+    <apex:form id="myForm">        
+        <apex:pageBlock title="Summary Criteria" >
+            <apex:pageBlockSection columns="1">
+                <apex:pageBlockSectionItem >
+                    <apex:inputField value="{!summaryCriteria.Fiscal_Year__c}"/>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons >
+                <apex:commandButton action="{!doSummarize}" value="Summarize"
+                    rerender="summaryData,summary,errors"/>
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+        <apex:pageBlock id="summaryData" title="Summary Results">
+            <apex:messages id="errors"/>
+            <apex:pageBlockTable value="{!summaryData}" var="yearlySummary" >
+                <apex:column >
+                    <img id="{!yearlySummary.Id}_icon" src="{!IF(yearlySummary.Status__c == 'Processing',URLFOR($Resource.pending_icon),URLFOR($Resource.complete_icon))}"/>
+                </apex:column>
+                <apex:column value="{!yearlySummary.Fiscal_Year__c}">
+	                <apex:facet name="header">{!$ObjectType.Opp_Summary_Data__c.fields.Fiscal_Year__c.label}</apex:facet>
+                </apex:column>
+                <apex:column value="{!yearlySummary.CreatedBy.Name}">
+	                <apex:facet name="header">Created By</apex:facet>
+                </apex:column>
+                <apex:column value="{!yearlySummary.CreatedDate}">
+	                <apex:facet name="header">Created Date</apex:facet>
+                </apex:column>
+                <apex:column >
+                    <div id="{!yearlySummary.Id}" style="{!IF(yearlySummary.Status__c == 'Processing',"display:none","display:block")}">
+                        <apex:commandLink action="{!getSummaryDetails}" rerender="summary, errors">Show
+                            <apex:param assignTo="{!selectedSummaryId}" value="{!yearlySummary.Id}" name="sumId"/>
+                        </apex:commandLink>
+                    </div>    
+                </apex:column>
+            </apex:pageBlockTable>
+        </apex:pageBlock>
+        <apex:pageBlock id="summary" title="Yearly Summary">
+            <apex:pageBlockSection columns="2">
+                <apex:outputField value="{!selectedSummary.Fiscal_Year__c}"/>
+                <apex:outputField value="{!selectedSummary.Total_Amount__c}"/>
+                <apex:outputField value="{!selectedSummary.Total_Open_Amount__c}"/>
+                <apex:outputField value="{!selectedSummary.Total_Closed_Won_Amount__c}"/>
+                <apex:outputField value="{!selectedSummary.Total_Open_Amount__c}"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>
