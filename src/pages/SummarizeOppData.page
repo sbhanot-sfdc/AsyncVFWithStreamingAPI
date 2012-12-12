@@ -56,14 +56,17 @@
                 </apex:column>
             </apex:pageBlockTable>
         </apex:pageBlock>
-        <apex:pageBlock id="summary" title="Yearly Summary">
-            <apex:pageBlockSection columns="2">
-                <apex:outputField value="{!selectedSummary.Fiscal_Year__c}"/>
-                <apex:outputField value="{!selectedSummary.Total_Amount__c}"/>
-                <apex:outputField value="{!selectedSummary.Total_Open_Amount__c}"/>
-                <apex:outputField value="{!selectedSummary.Total_Closed_Won_Amount__c}"/>
-                <apex:outputField value="{!selectedSummary.Total_Open_Amount__c}"/>
-            </apex:pageBlockSection>
+        <apex:pageBlock id="summary" title="Summary Data">
+            <apex:chart height="250" width="450" animate="true" data="{!cData}" legend="false">
+                <apex:pieSeries labelField="name" dataField="amount" donut="50">
+                    <apex:chartLabel display="middle" orientation="vertical" font="bold 18px Helvetica"/>
+                </apex:pieSeries>    
+            </apex:chart>
+            <apex:outputPanel rendered="{!!ISNULL(selectedSummary)}">
+                <br/>
+            	<b>Total amount for Opportunities in FY {!selectedSummary.Fiscal_Year__c} :&nbsp;  
+                    <span style="color:red"><apex:outputField value="{!selectedSummary.Total_Amount__c}"/></span></b>
+            </apex:outputPanel>    
         </apex:pageBlock>
     </apex:form>
 </apex:page>

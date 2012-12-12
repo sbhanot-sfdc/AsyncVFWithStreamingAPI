@@ -4,6 +4,7 @@ public with sharing class SummarizeOppDataController {
     public Opp_Summary_Data__c selectedSummary {get;set;}
     public String selectedSummaryId {get;set;}
     private Map<Id,Opp_Summary_Data__c> id2Summary = new Map<Id,Opp_Summary_Data__c>();
+    public List<ChartData> cData {get;set;}
     
     public SummarizeOppDataController(){
         summaryCriteria = new Opp_Summary_Data__c();
@@ -48,6 +49,20 @@ public with sharing class SummarizeOppDataController {
               getSummaryData();
               selectedSummary = id2Summary.get(selectedSummaryId);  
         }
+        
+        cData = new List<ChartData>();
+        if (selectedSummary.Total_Closed_Won_Amount__c != null && 
+            selectedSummary.Total_Closed_Won_Amount__c > 0){
+        	cData.add(new ChartData('Closed Won',selectedSummary.Total_Closed_Won_Amount__c));
+        }
+        if (selectedSummary.Total_Closed_Lost_Amount__c != null && 
+            selectedSummary.Total_Closed_Lost_Amount__c > 0){
+        	cData.add(new ChartData('Closed Lost',selectedSummary.Total_Closed_Lost_Amount__c)); 
+        }
+        if (selectedSummary.Total_Open_Amount__c != null && 
+            selectedSummary.Total_Open_Amount__c > 0){
+        	cData.add(new ChartData('Open',selectedSummary.Total_Open_Amount__c)); 
+        }
         return null;
     }
 
@@ -69,6 +84,16 @@ public with sharing class SummarizeOppDataController {
         catch(QueryException e)
         {
             ApexPages.addMessage(new ApexPages.message(ApexPages.severity.ERROR,e.getMessage()));
+        }
+    }
+    
+    public class ChartData {
+        public String name { get; set; }
+        public Decimal amount { get; set; }
+
+        public ChartData(String name, Decimal data) {
+            this.name = name;
+            this.amount = data;
         }
     }
 }

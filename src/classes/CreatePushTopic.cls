@@ -10,7 +10,7 @@ global class CreatePushTopic implements InstallHandler {
             pushTopic = new PushTopic();
         }
         pushTopic.Name = 'OppSummaryData';
-        pushTopic.Query = 'SELECT Id, Status__c FROM Opp_Summary_Data__c';
+        pushTopic.Query = 'SELECT Id, Status__c FROM Opp_Summary_Data__c where status__c =\'Complete\'';
         pushTopic.ApiVersion = 26.0;
         pushTopic.NotifyForOperations = 'Update';
         pushTopic.NotifyForFields = 'Referenced';
